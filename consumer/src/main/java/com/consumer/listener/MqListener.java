@@ -73,4 +73,13 @@ public class MqListener {
         System.out.println("消费者2收到了topic的消息" + msg);
         Thread.sleep(20);
     }
+
+    @RabbitListener(bindings = @QueueBinding(
+            value = @Queue(value = "delay.queue",durable = "true"),
+            exchange = @Exchange(value = "delay.direct",delayed = "true"),
+            key = "hi"
+    ))
+    public void listenDelayQueue(String msg){
+        System.out.println("接收到delay的消息");
+    }
 }

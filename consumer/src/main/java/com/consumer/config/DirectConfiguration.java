@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 public class DirectConfiguration {
 
     @Bean
-    public DirectExchange directExchange(){
+    public DirectExchange directExchange1(){
         return new DirectExchange("njnuqy.exchange");
     }
 

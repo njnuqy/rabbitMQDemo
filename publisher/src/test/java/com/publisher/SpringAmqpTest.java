@@ -2,12 +2,18 @@ package com.publisher;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
+import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessageBuilder;
+import org.springframework.amqp.core.MessageDeliveryMode;
+import org.springframework.amqp.core.MessagePostProcessor;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -89,4 +95,26 @@ public class SpringAmqpTest {
         rabbitTemplate.convertAndSend("njnuqy.direct","red","hello",cd);
         Thread.sleep(2000);
     }
+
+    @Test
+    void testPageOut(){
+        Message message = MessageBuilder.withBody("hello".getBytes(StandardCharsets.UTF_8))
+                .setDeliveryMode(MessageDeliveryMode.PERSISTENT).build();
+        for (int i = 0; i < 1000000; i++) {
+            rabbitTemplate.convertAndSend("simple.queue",message);
+        }
+    }
+
+    @Test
+    void testSendTTLMessage(){
+        rabbitTemplate.convertAndSend("simple.queue","hi","hello",new MessagePostProcessor(){
+            @Override
+            public Message postProcessMessage(Message message) throws AmqpException {
+                message.getMessageProperties().setExpiration("1000");
+                return message;
+            }
+        });
+    }
+
+
 }
